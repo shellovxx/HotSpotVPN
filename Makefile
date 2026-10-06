@@ -1,6 +1,8 @@
 ARCHS = arm64 arm64e
 TARGET = iphone:clang:16.5:15.0
 THEOS_PACKAGE_SCHEME = rootless
+FINALPACKAGE ?= 1
+DEBUG ?= 0
 
 include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = HotspotVPNDNS

@@ -10,7 +10,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix='hotspotvpndns-tests-') as temp:
         suffix='.dll' if sys.platform=='win32' else '.dylib' if sys.platform=='darwin' else '.so'
         library=Path(temp)/('dhcp_dns'+suffix)
-        subprocess.run([args.cc,'-std=c11','-O2','-Wall','-Wextra','-Werror','-shared',*(['-fPIC'] if sys.platform!='win32' else []),str(root/'src/dhcp_dns.c'),'-o',str(library)],check=True)
+        compiler=[args.cc,'cc'] if Path(args.cc).stem.lower()=='zig' else [args.cc]
+        subprocess.run([*compiler,'-std=c11','-O2','-Wall','-Wextra','-Werror','-shared',*(['-fPIC'] if sys.platform!='win32' else []),str(root/'src/dhcp_dns.c'),'-o',str(library)],check=True)
         subprocess.run([sys.executable,str(root/'tests/test_packets.py'),str(library)],check=True)
 
 if __name__=='__main__':main()

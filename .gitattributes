@@ -1,9 +1,14 @@
 * text=auto
+*.yml text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
 *.c text eol=lf
 *.h text eol=lf
 *.py text eol=lf
 *.plist text eol=lf
 *.md text eol=lf
+*.sh text eol=lf
+*.json text eol=lf
 Makefile text eol=lf
 control text eol=lf
 postinst text eol=lf

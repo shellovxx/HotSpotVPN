@@ -35,7 +35,7 @@
 			<key>key</key>
 			<string>Enabled</string>
 			<key>default</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>cell</key>

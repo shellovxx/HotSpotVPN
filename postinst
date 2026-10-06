@@ -4,17 +4,20 @@ if [ "${1:-}" = configure ]; then
     prefs=/var/mobile/Library/Preferences/local.hotspotvpndns.plist
     if [ ! -e "$prefs" ] && [ ! -L "$prefs" ]; then
         umask 022
-        cat > "$prefs.new" <<'PLIST'
+        temp=$(mktemp "$prefs.XXXXXX")
+        trap 'rm -f "$temp"' EXIT
+        cat > "$temp" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0"><dict>
-<key>Enabled</key><false/>
+<key>Enabled</key><true/>
 <key>Mode</key><string>cloudflare</string>
 <key>CustomDNS</key><string>1.1.1.1</string>
 </dict></plist>
 PLIST
-        chown mobile:mobile "$prefs.new"
-        chmod 644 "$prefs.new"
-        mv "$prefs.new" "$prefs"
+        chown mobile:mobile "$temp"
+        chmod 644 "$temp"
+        mv "$temp" "$prefs"
+        trap - EXIT
     fi
     launchctl kickstart -k user/foreground/com.apple.bootpd 2>/dev/null || killall bootpd 2>/dev/null || true
 fi

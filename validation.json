@@ -2,11 +2,13 @@
   "date": "2026-10-06",
   "target": "iPhone 11 Pro Max / iOS 16.6.1 / rootless",
   "device_installation": true,
-  "installed_version": "0.1.0~rc1",
-  "production_released": false,
-  "production_blocker": "UDP DNS queries reach Happ utun7, but replies are absent; iPhone TCP DNS works.",
+  "installed_version": "1.0.0",
+  "production_released": true,
+  "original_hotspotvpn_version": "1.0",
+  "vpn_app": "Happ 6.0.0",
   "default_selection": "cloudflare",
-  "enabled_on_device_at_finish": false,
+  "fresh_default_enabled": true,
+  "enabled_on_device_at_finish": true,
   "build": {
     "compiler": "Procursus Clang 16",
     "linker": "ld64 951.9",
@@ -15,8 +17,8 @@
     "code_signature": "embedded ad hoc"
   },
   "sha256": {
-    "deb": "78625ca4629dc0373fce3ea04838595af8e0aee6b67f2fd751d99881205495f9",
-    "dylib": "3afcfe2b2eadec89cbf7288e20c0f8776ccd0cb7c1c77aefb55f488d5b6c0160"
+    "deb": "b3d1e494a6a00a15c4bd27314f6fca5e609d3ebda7b1835d0897580b1343d7e7",
+    "dylib": "cb2e3ca657bab1adfb8154f1f2b878c91ca11b105e364a20b1b0c2597825cd36"
   },
   "verification": {
     "portable_parser_tests": 28,
@@ -34,134 +36,126 @@
       "disabled",
       "invalid IPv4"
     ],
-    "rc_repeat_offer_count": 10,
     "settings_pane_confirmed_by_user": true,
     "icon_asset_point_size": 29,
     "final_icon_visual_confirmation": false,
     "new_bootpd_crashes_after_fixes": 0,
     "package_contents_checked": true,
-    "arm64_and_old_arm64e_rejected": true
+    "arm64_and_old_arm64e_rejected": true,
+    "production_fresh_defaults_offer_ack": "enabled cloudflare 1.1.1.1",
+    "production_preserved_custom_offer_ack": "9.9.9.9",
+    "installed_dylib_matches_package": true,
+    "remote_ci_run": false
   },
-  "dns_checks": {
-    "client_udp_cloudflare": [
-      {
-        "dns": "1.1.1.1",
-        "transport": "udp-ethernet",
-        "domain": "youtube.com",
-        "error": "timeout"
-      },
-      {
-        "dns": "1.1.1.1",
-        "transport": "udp-ethernet",
-        "domain": "www.youtube.com",
-        "error": "timeout"
-      },
-      {
-        "dns": "1.1.1.1",
-        "transport": "udp-ethernet",
-        "domain": "example.com",
-        "error": "timeout"
-      }
-    ],
-    "client_udp_google": [
-      {
-        "dns": "8.8.8.8",
-        "transport": "udp-ethernet",
-        "domain": "youtube.com",
-        "error": "timeout"
-      },
-      {
-        "dns": "8.8.8.8",
-        "transport": "udp-ethernet",
-        "domain": "www.youtube.com",
-        "error": "timeout"
-      },
-      {
-        "dns": "8.8.8.8",
-        "transport": "udp-ethernet",
-        "domain": "example.com",
-        "error": "timeout"
-      }
-    ],
-    "client_gateway": [
-      {
-        "dns": "172.20.10.1",
-        "transport": "udp-ethernet",
-        "domain": "example.com",
-        "rcode": 0,
-        "answers": 2,
-        "matching_id": true,
-        "response_source": "172.20.10.1",
-        "udp_checksum_valid": true
-      },
-      {
-        "dns": "172.20.10.1",
-        "transport": "udp-ethernet",
-        "domain": "www.youtube.com",
-        "rcode": 2,
-        "answers": 0,
-        "matching_id": true,
-        "response_source": "172.20.10.1",
-        "udp_checksum_valid": true
-      },
-      {
-        "dns": "172.20.10.1",
-        "transport": "udp-ethernet",
-        "domain": "youtube.com",
-        "rcode": 2,
-        "answers": 0,
-        "matching_id": true,
-        "response_source": "172.20.10.1",
-        "udp_checksum_valid": true
-      }
-    ],
-    "iphone_tcp": [
-      {
-        "origin": "iPhone via SSH TCP channel",
-        "dns": "1.1.1.1",
-        "transport": "tcp",
-        "domain": "youtube.com",
-        "rcode": 0,
-        "answers": 4,
-        "matching_id": true
-      },
-      {
-        "origin": "iPhone via SSH TCP channel",
-        "dns": "1.1.1.1",
-        "transport": "tcp",
-        "domain": "example.com",
-        "rcode": 0,
-        "answers": 2,
-        "matching_id": true
-      },
-      {
-        "origin": "iPhone via SSH TCP channel",
-        "dns": "8.8.8.8",
-        "transport": "tcp",
-        "domain": "youtube.com",
-        "rcode": 0,
-        "answers": 4,
-        "matching_id": true
-      },
-      {
-        "origin": "iPhone via SSH TCP channel",
-        "dns": "8.8.8.8",
-        "transport": "tcp",
-        "domain": "example.com",
-        "rcode": 0,
-        "answers": 2,
-        "matching_id": true
-      }
-    ],
-    "cloudflare_test_packets_on_cellular_interface": 0,
-    "tested_vpn_app": "Happ 6.0.0",
-    "udp_from_iphone_itself": "unverified"
+  "udp_production": [
+    {
+      "protocol": "ntp",
+      "host": "162.159.200.123",
+      "port": 123,
+      "stratum": 3,
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1362,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "dns",
+      "host": "1.1.1.1",
+      "port": 53,
+      "domain": "youtube.com",
+      "rcode": 0,
+      "answers": 4,
+      "truncated": false,
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1363,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "stun",
+      "host": "162.159.207.0",
+      "port": 3478,
+      "message_type": "0x101",
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1384,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "stun",
+      "host": "162.159.207.0",
+      "port": 53,
+      "message_type": "0x101",
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1406,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "stun",
+      "host": "74.125.250.129",
+      "port": 19302,
+      "message_type": "0x101",
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1417,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "ntp",
+      "host": "162.159.200.1",
+      "port": 123,
+      "stratum": 3,
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1481,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "dns",
+      "host": "1.1.1.1",
+      "port": 53,
+      "domain": "example.com",
+      "rcode": 0,
+      "answers": 2,
+      "truncated": false,
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1481,
+      "checksum_valid": true
+    },
+    {
+      "protocol": "dns",
+      "host": "8.8.8.8",
+      "port": 53,
+      "domain": "youtube.com",
+      "rcode": 0,
+      "answers": 4,
+      "truncated": false,
+      "response": true,
+      "attempts": 2,
+      "elapsed_ms": 1492,
+      "checksum_valid": true
+    }
+  ],
+  "packet_correlation": {
+    "matching": "Exact UDP request payload, including randomized DNS/STUN/NTP transaction tokens; IPv4 UDP captures only.",
+    "unique_test_requests": 8,
+    "bridge_test_request_packets": 16,
+    "tunnel_test_request_packets": 16,
+    "cellular_test_request_packets": 0,
+    "cellular_background_udp_packets": 8
   },
+  "first_response_observation": "All eight production replies arrived 1.36-1.49 seconds after start; two sends at t=0 and t=1s. Exact cause of initial delay/loss is unknown.",
+  "historical_rc_timeouts": "Single-request timeouts superseded by successful retried UDP DNS/STUN/NTP tests; no routing change made.",
   "limits": [
-    "DHCP selection only; no mandatory interception",
+    "DHCP selection only; no mandatory DNS interception",
     "Existing option 6 required",
     "IPv6/DoH/DoT not controlled",
-    "No end-to-end UDP DNS success",
-    "Wi-Fi hotspot not tested"
+    "Background iPhone DNS observed on cellular interface",
+    "USB client tested; Wi-Fi not tested",
+    "Not a guarantee for every UDP application",
+    "No kill switch; VPN-disabled behavior not separately tested",
+    "Other devices and VPN apps not tested"
   ]
 }

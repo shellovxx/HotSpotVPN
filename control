@@ -1,8 +1,8 @@
 Package: local.hotspotvpndns
-Name: HotspotVPN DNS (Test build)
-Version: 0.1.0~rc1
+Name: HotspotVPN DNS
+Version: 1.0.0
 Architecture: iphoneos-arm64
-Description: DHCP DNS selection for HotspotVPN. Device-tested; VPN UDP DNS response issue remains unresolved.
+Description: Select Cloudflare, Google or a custom IPv4 DNS for HotspotVPN hotspot clients on rootless iOS.
 Maintainer: Local build
 Author: Local build
 Section: Tweaks
