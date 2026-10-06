@@ -1,0 +1,14 @@
+/work/
+/outputs/
+/.theos/
+/packages/
+__pycache__/
+*.py[cod]
+*.o
+*.dll
+*.dylib
+*.deb
+*.pcap
+*.ips
+.DS_Store
+.env

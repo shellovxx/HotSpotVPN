@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-06",
+  "target": "iPhone 11 Pro Max / iOS 16.6.1 / rootless",
+  "device_installation": true,
+  "installed_version": "0.1.0~rc1",
+  "production_released": false,
+  "production_blocker": "UDP DNS queries reach Happ utun7, but replies are absent; iPhone TCP DNS works.",
+  "default_selection": "cloudflare",
+  "enabled_on_device_at_finish": false,
+  "build": {
+    "compiler": "Procursus Clang 16",
+    "linker": "ld64 951.9",
+    "flags": "-O2 -DNDEBUG -Wall -Wextra -Werror",
+    "cpu_subtype": "0x80000002",
+    "code_signature": "embedded ad hoc"
+  },
+  "sha256": {
+    "deb": "78625ca4629dc0373fce3ea04838595af8e0aee6b67f2fd751d99881205495f9",
+    "dylib": "3afcfe2b2eadec89cbf7288e20c0f8776ccd0cb7c1c77aefb55f488d5b6c0160"
+  },
+  "verification": {
+    "portable_parser_tests": 28,
+    "random_inputs": 20000,
+    "dhcp_usb_offer_ack": [
+      "cloudflare",
+      "google",
+      "custom 9.9.9.9",
+      "disabled"
+    ],
+    "dhcp_inform": [
+      "cloudflare",
+      "google",
+      "custom",
+      "disabled",
+      "invalid IPv4"
+    ],
+    "rc_repeat_offer_count": 10,
+    "settings_pane_confirmed_by_user": true,
+    "icon_asset_point_size": 29,
+    "final_icon_visual_confirmation": false,
+    "new_bootpd_crashes_after_fixes": 0,
+    "package_contents_checked": true,
+    "arm64_and_old_arm64e_rejected": true
+  },
+  "dns_checks": {
+    "client_udp_cloudflare": [
+      {
+        "dns": "1.1.1.1",
+        "transport": "udp-ethernet",
+        "domain": "youtube.com",
+        "error": "timeout"
+      },
+      {
+        "dns": "1.1.1.1",
+        "transport": "udp-ethernet",
+        "domain": "www.youtube.com",
+        "error": "timeout"
+      },
+      {
+        "dns": "1.1.1.1",
+        "transport": "udp-ethernet",
+        "domain": "example.com",
+        "error": "timeout"
+      }
+    ],
+    "client_udp_google": [
+      {
+        "dns": "8.8.8.8",
+        "transport": "udp-ethernet",
+        "domain": "youtube.com",
+        "error": "timeout"
+      },
+      {
+        "dns": "8.8.8.8",
+        "transport": "udp-ethernet",
+        "domain": "www.youtube.com",
+        "error": "timeout"
+      },
+      {
+        "dns": "8.8.8.8",
+        "transport": "udp-ethernet",
+        "domain": "example.com",
+        "error": "timeout"
+      }
+    ],
+    "client_gateway": [
+      {
+        "dns": "172.20.10.1",
+        "transport": "udp-ethernet",
+        "domain": "example.com",
+        "rcode": 0,
+        "answers": 2,
+        "matching_id": true,
+        "response_source": "172.20.10.1",
+        "udp_checksum_valid": true
+      },
+      {
+        "dns": "172.20.10.1",
+        "transport": "udp-ethernet",
+        "domain": "www.youtube.com",
+        "rcode": 2,
+        "answers": 0,
+        "matching_id": true,
+        "response_source": "172.20.10.1",
+        "udp_checksum_valid": true
+      },
+      {
+        "dns": "172.20.10.1",
+        "transport": "udp-ethernet",
+        "domain": "youtube.com",
+        "rcode": 2,
+        "answers": 0,
+        "matching_id": true,
+        "response_source": "172.20.10.1",
+        "udp_checksum_valid": true
+      }
+    ],
+    "iphone_tcp": [
+      {
+        "origin": "iPhone via SSH TCP channel",
+        "dns": "1.1.1.1",
+        "transport": "tcp",
+        "domain": "youtube.com",
+        "rcode": 0,
+        "answers": 4,
+        "matching_id": true
+      },
+      {
+        "origin": "iPhone via SSH TCP channel",
+        "dns": "1.1.1.1",
+        "transport": "tcp",
+        "domain": "example.com",
+        "rcode": 0,
+        "answers": 2,
+        "matching_id": true
+      },
+      {
+        "origin": "iPhone via SSH TCP channel",
+        "dns": "8.8.8.8",
+        "transport": "tcp",
+        "domain": "youtube.com",
+        "rcode": 0,
+        "answers": 4,
+        "matching_id": true
+      },
+      {
+        "origin": "iPhone via SSH TCP channel",
+        "dns": "8.8.8.8",
+        "transport": "tcp",
+        "domain": "example.com",
+        "rcode": 0,
+        "answers": 2,
+        "matching_id": true
+      }
+    ],
+    "cloudflare_test_packets_on_cellular_interface": 0,
+    "tested_vpn_app": "Happ 6.0.0",
+    "udp_from_iphone_itself": "unverified"
+  },
+  "limits": [
+    "DHCP selection only; no mandatory interception",
+    "Existing option 6 required",
+    "IPv6/DoH/DoT not controlled",
+    "No end-to-end UDP DNS success",
+    "Wi-Fi hotspot not tested"
+  ]
+}

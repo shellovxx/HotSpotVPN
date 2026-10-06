@@ -1,0 +1,9 @@
+Package: local.hotspotvpndns
+Name: HotspotVPN DNS (Test build)
+Version: 0.1.0~rc1
+Architecture: iphoneos-arm64
+Description: DHCP DNS selection for HotspotVPN. Device-tested; VPN UDP DNS response issue remains unresolved.
+Maintainer: Local build
+Author: Local build
+Section: Tweaks
+Depends: firmware (>= 15.0), com.evgeniy.hotspotvpn (>= 1.0), preferenceloader, mobilesubstrate | substitute | libhooker | ellekit
