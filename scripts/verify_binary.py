@@ -35,4 +35,4 @@ if __name__=='__main__':
     found=slices(Path(sys.argv[1]).read_bytes())
     if (0x0100000c,0x80000002) not in found:
         sys.exit('Refusing package: no arm64e PAC00 slice for iPhone 11 Pro Max / iOS 16.6.1. Use a compatible Apple/Procursus toolchain.')
-    print('Architecture check passed: signed arm64e PAC00 dylib. See validation.json for device test results.')
+    print('Architecture check passed: signed arm64e PAC00 dylib.')
