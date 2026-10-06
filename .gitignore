@@ -8,6 +8,7 @@ __pycache__/
 *.dll
 *.dylib
 *.deb
+!/original/com.evgeniy.hotspotvpn_1.0_iphoneos-arm64.deb
 *.pcap
 *.ips
 .DS_Store
