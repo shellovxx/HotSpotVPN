@@ -6,10 +6,18 @@ DEBUG ?= 0
 
 include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = HotspotVPNDNS
-HotspotVPNDNS_FILES = src/HotspotVPNDNS.c src/dhcp_dns.c
+HotspotVPNDNS_FILES = src/HotspotVPNDNS.x src/dhcp_dns.c src/preferences.c
 HotspotVPNDNS_CFLAGS = -O2 -DNDEBUG -Wall -Wextra -Werror
 HotspotVPNDNS_FRAMEWORKS = CoreFoundation
+HotspotVPNDNS_USE_MODULES = 0
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-stage::
-	python3 scripts/verify_binary.py "$(THEOS_STAGING_DIR)/var/jb/Library/MobileSubstrate/DynamicLibraries/HotspotVPNDNS.dylib"
+	python3 scripts/verify_binary.py "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries/HotspotVPNDNS.dylib"
+	python3 scripts/verify_binary.py "$(THEOS_STAGING_DIR)/Library/PreferenceBundles/HotspotVPNDNSPrefs.bundle/HotspotVPNDNSPrefs"
+
+before-package::
+	install -m 755 postinst postrm "$(THEOS_STAGING_DIR)/DEBIAN/"
+
+SUBPROJECTS += prefs
+include $(THEOS_MAKE_PATH)/aggregate.mk

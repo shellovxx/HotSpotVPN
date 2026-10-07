@@ -18,9 +18,9 @@ def packet(options=None, kind=5):
     p[236:240] = bytes((99,130,83,99))
     if options is None: options = option(6,OLD)
     return p + option(53,bytes((kind,))) + option(54,SERVER) + options + b'\xff'
-def rewrite(p, frame=False, server=SERVER):
+def rewrite(p, frame=False, server=SERVER, selected=DNS):
     buf = (ctypes.c_uint8 * len(p)).from_buffer_copy(p)
-    dns = (ctypes.c_uint8 * 4).from_buffer_copy(DNS)
+    dns = (ctypes.c_uint8 * 4).from_buffer_copy(selected)
     srv = None if server is None else (ctypes.c_uint8 * 4).from_buffer_copy(server)
     r = getattr(DLL,'hpd_rewrite_ethernet' if frame else 'hpd_rewrite_dhcp')(buf,len(p),dns,srv)
     return r,bytes(buf)
@@ -54,6 +54,18 @@ class PacketTests(unittest.TestCase):
             self.assertEqual(r,1)
             self.assertEqual(out,p.replace(OLD,DNS))
             self.assertEqual(len(out),len(p))
+    def test_google_and_custom_replace_cloudflare(self):
+        for address in ('8.8.8.8', '9.9.9.9', '192.168.0.53'):
+            selected = ipaddress.IPv4Address(address).packed
+            for kind in (2, 5):
+                for ethernet in (False, True):
+                    p = packet(option(6, DNS), kind=kind)
+                    if ethernet: p = frame(p)
+                    r, out = rewrite(p, ethernet, selected=selected)
+                    self.assertEqual(r, 1)
+                    self.assertIn(option(6, selected), out)
+                    self.assertNotIn(option(6, DNS), out)
+                    self.assertEqual(len(p), len(out))
     def test_multiple_dns_no_carrier_fallback(self):
         p = packet(option(6,OLD+b'\x08\x08\x08\x08'))
         r,out = rewrite(p)

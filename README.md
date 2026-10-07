@@ -1,32 +1,22 @@
 # HotspotVPN DNS
 
-Выбор DNS для клиентов точки доступа: Cloudflare, Google или свой IPv4. Версия 1.0.0 · rootless iOS 15+.
+Выбор DHCP DNS для клиентов точки доступа: Cloudflare, Google или свой IPv4. Rootless iOS 15+, дополнение к оригинальному HotspotVPN.
 
 ## Установка
 
-1. Установите VPN-приложение и [оригинальный HotspotVPN](original/com.evgeniy.hotspotvpn_1.0_iphoneos-arm64.deb) ≥ 1.0. Для оригинала нужны CCSupport и библиотека хуков.
-2. Установите собранный пакет `local.hotspotvpndns` через менеджер пакетов. Дополнению нужны оригинал, PreferenceLoader и библиотека хуков.
-3. Включите VPN и HotspotVPN в Пункте управления. Выберите DNS в **Настройки → HotspotVPN** и переподключите клиентов.
+Установите [оригинал](original/com.evgeniy.hotspotvpn_1.0_iphoneos-arm64.deb), затем DEB из [релиза](https://github.com/shellovxx/HotSpotVPN/releases/latest). В **Настройки → HotspotVPN** выберите DNS и включите его выдачу. Также включите оригинальный HotspotVPN в Пункте управления.
 
-Дополнение не заменяет оригинал. Менеджер пакетов скачивает зависимости только из подключённых источников; `dpkg -i` их не скачивает.
-
-При первой установке выбран Cloudflare `1.1.1.1`; обновления сохраняют настройки. Hook `bootpd` заменяет DHCP option 6 в OFFER/ACK, сохраняет размер пакета и пересчитывает UDP checksum.
-
-Удаление: `sudo dpkg -r local.hotspotvpndns`. Оригинал и настройки сохраняются.
+Отключение любого переключателя возвращает системный DHCP DNS. После изменения переподключите клиентов или обновите DHCP-аренду.
 
 ## Сборка
 
-Нужны Theos, совместимый Apple clang и iOS 16.5 SDK. Пакет должен содержать подписанную arm64e PAC00 slice.
+Theos, совместимый clang и SDK iOS 16.5:
 
 ```sh
 make clean package FINALPACKAGE=1 DEBUG=0
 python3 tests/run.py
 ```
 
-Нативная сборка: `HPD_SDK=/path/iPhoneOS16.5.sdk sh scripts/build-native.sh`; упаковка — `scripts/package.py --help`. SDK и инструменты в репозиторий не входят.
+Logos: `src/HotspotVPNDNS.x` и `prefs/HPDRootListController.x`. C: `src/preferences.c` и `src/dhcp_dns.c`. Для нативной сборки: `THEOS=… sh scripts/build-native.sh`.
 
-## Проверка и ограничения
-
-Проверено по USB на iPhone 11 Pro Max / iOS 16.6.1 / Dopamine / ElleKit / Happ 6.0.0: DHCP, HTTPS, 8/8 UDP-проб DNS/STUN/NTP и 28 тестов парсера. UDP-ответы приходили после повтора через 1,3–1,5 с; причина задержки неизвестна.
-
-Wi-Fi и другие устройства не проверены. DoH/DoT, IPv6 и собственный DNS клиента не контролируются; kill switch отсутствует.
+**1.1.0 проверена по SSH на iPhone 11 Pro Max / iOS 16.6.1:** 36 DHCP-проверок, checksum, настоящие аренды Windows и 29 тестов парсера. Полная работа VPN не подтверждена: HTTPS и два STUN-запроса завершились таймаутами. Wi-Fi отдельно не проверялся; DoH/DoT и IPv6 не контролируются.

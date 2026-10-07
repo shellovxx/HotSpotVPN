@@ -1,6 +1,6 @@
 Package: local.hotspotvpndns
 Name: HotspotVPN DNS
-Version: 1.0.0
+Version: 1.1.0
 Architecture: iphoneos-arm64
 Description: Select Cloudflare, Google or a custom IPv4 DNS for HotspotVPN hotspot clients on rootless iOS.
 Maintainer: Local build
