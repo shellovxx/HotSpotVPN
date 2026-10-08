@@ -1,4 +1,4 @@
-#!/var/jb/bin/sh
+#!/bin/sh
 case "${1:-}" in
     remove|purge|disappear)
         launchctl kickstart -k user/foreground/com.apple.bootpd 2>/dev/null || killall bootpd 2>/dev/null || true

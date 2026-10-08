@@ -1,4 +1,5 @@
-/* Rootless iOS adapter; verified on iPhone 11 Pro Max / iOS 16.6.1. */
+/* RootHide bootpd transport hooks. Packet parsing remains portable C. */
+%config(generator=MobileSubstrate);
 #include "dhcp_dns.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <arpa/inet.h>
@@ -18,36 +19,14 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
-#include <syslog.h>
+#include <roothide.h>
 #include <unistd.h>
 
 #define PREFS "/var/mobile/Library/Preferences/local.hotspotvpndns.plist"
 #define MAX_PACKET 4096
 static _Thread_local int busy;
-static _Atomic unsigned rewrites;
-static ssize_t (*orig_sendto)(int,const void *,size_t,int,const struct sockaddr *,socklen_t);
-static ssize_t (*orig_sendmsg)(int,const struct msghdr *,int);
-static ssize_t (*orig_write)(int,const void *,size_t);
-static ssize_t (*orig_writev)(int,const struct iovec *,int);
-static int (*orig_ioctl)(int,unsigned long,...);
 static pthread_mutex_t bpf_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct { int active,fd; dev_t dev,rdev; ino_t ino; } bpf_fds[64];
-
-static void log_event(const char *format,...) {
-    char message[256];
-    va_list args;
-    va_start(args,format); vsnprintf(message,sizeof(message),format,args); va_end(args);
-    syslog(LOG_NOTICE,"[HotspotVPN DNS] %s",message);
-    int fd=open("/var/mobile/Library/Logs/HotspotVPNDNS.log",O_WRONLY|O_APPEND|O_CREAT|O_NOFOLLOW,0644);
-    if(fd<0) return;
-    struct stat st;
-    if(!fstat(fd,&st) && S_ISREG(st.st_mode) && st.st_size<131072) {
-        size_t n=strlen(message);
-        message[n++]='\n';
-        (void)write(fd,message,n);
-    }
-    close(fd);
-}
 
 static int bridge_name(const char *s) {
     if (strncmp(s,"bridge",6) || !s[6]) return 0;
@@ -64,7 +43,7 @@ static CFTypeRef dictionary_value(CFDictionaryRef dict,const char *name) {
 }
 
 static int selected_dns(uint8_t dns[4]) {
-    int fd = open(PREFS, O_RDONLY | O_NOFOLLOW);
+    int fd = open(jbroot(PREFS), O_RDONLY | O_NOFOLLOW);
     if (fd < 0) return 0;
     struct stat st;
     if (fstat(fd,&st) || !S_ISREG(st.st_mode) || st.st_size <= 0 || st.st_size > 16384) {
@@ -148,13 +127,14 @@ static uint8_t *udp_copy(int fd,const void *p,size_t n,const struct sockaddr *to
     return copy;
 }
 
-static int hooked_ioctl(int fd,unsigned long request,...) {
+%group DHCPDNS
+%hookf(int, ioctl, int fd, unsigned long request, ...) {
     /* Darwin arm64 passes variadic arguments on the stack. Match libc's ABI. */
     va_list args;
     va_start(args,request);
     void *arg=va_arg(args,void *);
     va_end(args);
-    int result=orig_ioctl(fd,request,arg);
+    int result=%orig(fd,request,arg);
     int saved=errno;
     if (request==BIOCSETIF && result==0 && fd>=0) {
         struct stat st;
@@ -220,38 +200,30 @@ static uint8_t *gather(const struct iovec *v,int count,size_t *n) {
     return p;
 }
 
-static void done(uint8_t *copy,ssize_t result,size_t n) {
-    if (copy && result >= 0 && (size_t)result == n) {
-        unsigned count = atomic_fetch_add(&rewrites,1) + 1;
-        if (count == 1 || !(count % 32)) log_event("DHCP responses rewritten: %u",count);
-    }
-    free(copy);
-}
-
-static ssize_t hooked_sendto(int fd,const void *p,size_t n,int flags,const struct sockaddr *to,socklen_t len) {
-    if (busy) return orig_sendto(fd,p,n,flags,to,len);
+%hookf(ssize_t, sendto, int fd, const void *p, size_t n, int flags, const struct sockaddr *to, socklen_t len) {
+    if (busy) return %orig(fd,p,n,flags,to,len);
     busy = 1;
     int saved = errno;
     uint8_t *copy = udp_copy(fd,p,n,to,len);
     errno = saved;
-    ssize_t result = orig_sendto(fd,copy ? copy : p,n,flags,to,len);
-    saved = errno; done(copy,result,n); errno = saved;
+    ssize_t result = %orig(fd,copy ? copy : p,n,flags,to,len);
+    saved = errno; free(copy); errno = saved;
     busy = 0; return result;
 }
 
-static ssize_t hooked_write(int fd,const void *p,size_t n) {
-    if (busy) return orig_write(fd,p,n);
+%hookf(ssize_t, write, int fd, const void *p, size_t n) {
+    if (busy) return %orig(fd,p,n);
     busy = 1;
     int saved = errno;
     uint8_t *copy = bpf_copy(fd,p,n);
     errno = saved;
-    ssize_t result = orig_write(fd,copy ? copy : p,n);
-    saved = errno; done(copy,result,n); errno = saved;
+    ssize_t result = %orig(fd,copy ? copy : p,n);
+    saved = errno; free(copy); errno = saved;
     busy = 0; return result;
 }
 
-static ssize_t hooked_sendmsg(int fd,const struct msghdr *msg,int flags) {
-    if (busy || !msg || msg->msg_iovlen < 1 || msg->msg_iovlen > 16) return orig_sendmsg(fd,msg,flags);
+%hookf(ssize_t, sendmsg, int fd, const struct msghdr *msg, int flags) {
+    if (busy || !msg || msg->msg_iovlen < 1 || msg->msg_iovlen > 16) return %orig(fd,msg,flags);
     busy = 1;
     int saved = errno;
     size_t n = 0;
@@ -262,13 +234,13 @@ static ssize_t hooked_sendmsg(int fd,const struct msghdr *msg,int flags) {
     struct iovec v = {copy,n};
     if (copy) { edited.msg_iov = &v; edited.msg_iovlen = 1; }
     errno = saved;
-    ssize_t result = orig_sendmsg(fd,copy ? &edited : msg,flags);
-    saved = errno; done(copy,result,n); errno = saved;
+    ssize_t result = %orig(fd,copy ? &edited : msg,flags);
+    saved = errno; free(copy); errno = saved;
     busy = 0; return result;
 }
 
-static ssize_t hooked_writev(int fd,const struct iovec *v,int count) {
-    if (busy) return orig_writev(fd,v,count);
+%hookf(ssize_t, writev, int fd, const struct iovec *v, int count) {
+    if (busy) return %orig(fd,v,count);
     busy = 1;
     int saved = errno;
     size_t n = 0;
@@ -277,36 +249,25 @@ static ssize_t hooked_writev(int fd,const struct iovec *v,int count) {
     free(joined);
     struct iovec edited = {copy,n};
     errno = saved;
-    ssize_t result = orig_writev(fd,copy ? &edited : v,copy ? 1 : count);
-    saved = errno; done(copy,result,n); errno = saved;
+    ssize_t result = %orig(fd,copy ? &edited : v,copy ? 1 : count);
+    saved = errno; free(copy); errno = saved;
     busy = 0; return result;
 }
 
-__attribute__((constructor)) static void start(void) {
+%end
+
+%ctor {
     const char *name = getprogname();
     if (!name || strcmp(name,"bootpd")) return;
     busy = 1;
-    void (*hook)(void *,void *,void **) = dlsym(RTLD_DEFAULT,"MSHookFunction");
-    const char *paths[] = {
-        "/var/jb/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate",
-        "/var/jb/usr/lib/libsubstrate.dylib"
-    };
-    for (unsigned i = 0; !hook && i < sizeof(paths)/sizeof(paths[0]); i++) {
-        void *lib = dlopen(paths[i],RTLD_NOW | RTLD_GLOBAL);
-        if (lib) hook = dlsym(lib,"MSHookFunction");
+    void *ioctlTarget = dlsym(RTLD_DEFAULT,"ioctl");
+    void *sendtoTarget = dlsym(RTLD_DEFAULT,"sendto");
+    void *sendmsgTarget = dlsym(RTLD_DEFAULT,"sendmsg");
+    void *writeTarget = dlsym(RTLD_DEFAULT,"write");
+    void *writevTarget = dlsym(RTLD_DEFAULT,"writev");
+    if (ioctlTarget && sendtoTarget && sendmsgTarget && writeTarget && writevTarget) {
+        %init(DHCPDNS, ioctl=ioctlTarget, sendto=sendtoTarget,
+              sendmsg=sendmsgTarget, write=writeTarget, writev=writevTarget);
     }
-    if (!hook) {
-        log_event("hook API unavailable in %s; inactive",name);
-        busy = 0; return;
-    }
-    unsigned installed = 0;
-#define INSTALL(symbol) do { \
-    void *target = dlsym(RTLD_DEFAULT,#symbol); \
-    if (target) { hook(target,(void *)hooked_##symbol,(void **)&orig_##symbol); \
-        if (orig_##symbol) installed++; } \
-} while (0)
-    INSTALL(ioctl); INSTALL(sendto); INSTALL(sendmsg); INSTALL(write); INSTALL(writev);
-#undef INSTALL
-    log_event("%u DHCP transport hooks installed in %s pid=%d (runtime CF keys)",installed,name,getpid());
     busy = 0;
 }

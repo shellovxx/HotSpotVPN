@@ -1,4 +1,4 @@
-#!/var/jb/bin/sh
+#!/bin/sh
 set -eu
 if [ "${1:-}" = configure ]; then
     prefs=/var/mobile/Library/Preferences/local.hotspotvpndns.plist

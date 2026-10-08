@@ -8,10 +8,10 @@
 		<string>PSLinkCell</string>
 		<key>label</key>
 		<string>HotspotVPN</string>
+		<key>icon</key>
+		<string>HotspotVPNDNS.png</string>
 		<key>detail</key>
 		<string>PSListController</string>
-		<key>icon</key>
-		<string>/var/jb/Library/ControlCenter/Bundles/HotspotVPNCC.bundle/Icon.png</string>
 	</dict>
 	<key>title</key>
 	<string>HotspotVPN</string>

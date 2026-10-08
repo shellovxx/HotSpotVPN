@@ -1,9 +1,9 @@
 Package: local.hotspotvpndns
 Name: HotspotVPN DNS
-Version: 1.0.0
-Architecture: iphoneos-arm64
-Description: Select Cloudflare, Google or a custom IPv4 DNS for HotspotVPN hotspot clients on rootless iOS.
+Version: 1.2.0
+Architecture: iphoneos-arm64e
+Description: Select Cloudflare, Google or a custom IPv4 DNS for HotspotVPN hotspot clients on RootHide iOS.
 Maintainer: Local build
 Author: Local build
 Section: Tweaks
-Depends: firmware (>= 15.0), com.evgeniy.hotspotvpn (>= 1.0), preferenceloader, mobilesubstrate | substitute | libhooker | ellekit
+Depends: firmware (>= 15.0), roothide (>= 0.1.0), com.evgeniy.hotspotvpn (>= 1.0), preferenceloader, ellekit
