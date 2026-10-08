@@ -2,6 +2,7 @@
 import argparse,gzip,hashlib,io,tarfile,posixpath
 from pathlib import Path
 from verify_binary import slices
+from verify_icon import validate as validate_icon
 
 def archive(files, links=None):
     out=io.BytesIO()
@@ -27,6 +28,7 @@ def main():
     args.add_argument('--preferences-binary',type=Path,required=True)
     args.add_argument('--output',type=Path,required=True)
     a=args.parse_args(); root=Path(__file__).resolve().parents[1]
+    validate_icon(root/'layout/Library/PreferenceLoader/Preferences/HotspotVPNDNS.plist',root/'prefs/Resources')
     binary=a.binary.read_bytes()
     if (0x0100000c,0x80000002) not in slices(binary): raise ValueError('arm64e PAC00 slice required')
     if b'/var/jb/' in binary: raise ValueError('legacy rootless path in RootHide dylib')
@@ -38,8 +40,6 @@ def main():
         './Library/MobileSubstrate/DynamicLibraries/HotspotVPNDNS.plist':((root/'HotspotVPNDNS.plist').read_bytes(),0o644),
         './Library/PreferenceLoader/Preferences/HotspotVPNDNS.plist':((root/'layout/Library/PreferenceLoader/Preferences/HotspotVPNDNS.plist').read_bytes(),0o644)
     }
-    for icon in (root/'layout/Library/PreferenceLoader/Preferences').glob('HotspotVPNDNS*.png'):
-        data['./Library/PreferenceLoader/Preferences/'+icon.name]=(icon.read_bytes(),0o644)
     preferences=a.preferences_binary.read_bytes()
     if (0x0100000c,0x80000002) not in slices(preferences): raise ValueError('preferences arm64e PAC00 slice required')
     if b'/var/jb/' in preferences: raise ValueError('legacy rootless path in preferences')

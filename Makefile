@@ -13,6 +13,7 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-stage::
 	python3 scripts/verify_binary.py "$(THEOS_STAGING_DIR)/Library/MobileSubstrate/DynamicLibraries/HotspotVPNDNS.dylib"
+	python3 scripts/verify_icon.py --entry "$(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/HotspotVPNDNS.plist" --resources "$(THEOS_STAGING_DIR)/Library/PreferenceBundles/HotspotVPNDNSPrefs.bundle"
 
 SUBPROJECTS += prefs
 include $(THEOS_MAKE_PATH)/aggregate.mk

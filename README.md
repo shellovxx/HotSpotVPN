@@ -5,7 +5,7 @@
 | Пакет | Версия | Назначение |
 |---|---|---|
 | `com.evgeniy.hotspotvpn` | `1.0+roothide.1` | Передача раздаваемого трафика через VPN, модуль Пункта управления |
-| `local.hotspotvpndns` | `1.2.0` | Cloudflare, Google или свой IPv4 DNS в DHCP для клиентов |
+| `local.hotspotvpndns` | `1.2.1` | Cloudflare, Google или свой IPv4 DNS в DHCP для клиентов |
 
 Оба `.deb` имеют архитектуру `iphoneos-arm64e`. DNS содержит подписанные arm64 и современные arm64e PAC00 slices. DNS-хуки переписаны на Logos; генератор MobileSubstrate использует установленный ElleKit. Диагностические логи удалены.
 
@@ -18,7 +18,7 @@
 3. Добавьте HotspotVPN в **Настройки → Пункт управления**. Включите VPN, точку доступа и кнопку HotspotVPN.
 4. Выберите DNS в **Настройки → HotspotVPN**, затем переподключите клиентов.
 
-Первоначально выбран Cloudflare `1.1.1.1`; обновления сохраняют настройки. Контроллер Настроек и DHCP-хук используют общий атомарно записываемый файл через API `jbroot`; состояние основного HotspotVPN читается из его системного домена. Иконка PreferenceLoader имеет стандартные 29 точек и варианты 2×/3×. Хуки работают только в `bootpd`, меняют DHCP option 6 в OFFER/ACK и пересчитывают UDP checksum, сохраняя длину пакета.
+Первоначально выбран Cloudflare `1.1.1.1`; обновления сохраняют настройки. Контроллер Настроек и DHCP-хук используют общий атомарно записываемый файл через API `jbroot`; состояние основного HotspotVPN читается из его системного домена. Иконка находится внутри `HotspotVPNDNSPrefs.bundle`, откуда PreferenceLoader загружает ресурсы отдельной страницы настроек. Размер — стандартные 29 точек с вариантами 2×/3×; упаковка проверяет все три PNG. Хуки работают только в `bootpd`, меняют DHCP option 6 в OFFER/ACK и пересчитывают UDP checksum, сохраняя длину пакета.
 
 Удаление DNS: `sudo dpkg -r local.hotspotvpndns`. Основной пакет и сохранённые настройки остаются. `dpkg -i` самостоятельно не скачивает зависимости.
 
@@ -29,7 +29,7 @@ make clean package FINALPACKAGE=1 DEBUG=0
 python3 tests/run.py
 # Альтернатива: clang, ld, lipo и ldid в PATH
 THEOS=/path/to/roothide-theos HPD_SDK=/path/to/iPhoneOS16.5.sdk sh scripts/build-native.sh
-python3 scripts/package.py --binary work/ios-build/HotspotVPNDNS.dylib --preferences-binary work/ios-build/HotspotVPNDNSPrefs.dylib --output packages/local.hotspotvpndns_1.2.0_iphoneos-arm64e.deb
+python3 scripts/package.py --binary work/ios-build/HotspotVPNDNS.dylib --preferences-binary work/ios-build/HotspotVPNDNSPrefs.dylib --output packages/local.hotspotvpndns_1.2.1_iphoneos-arm64e.deb
 ```
 
 Для воспроизведения основной сборки сначала конвертируйте копию `original/com.evgeniy.hotspotvpn_1.0_iphoneos-arm64.deb` через RootHide Converter. Converter может удалить входной файл, поэтому используйте копию. Затем на устройстве с Python 3, ldid и cctools выполните:

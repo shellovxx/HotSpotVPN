@@ -35,4 +35,4 @@ for hpd_name in HotspotVPNDNS HotspotVPNDNSPrefs; do
     "$hpd_lipo" -create "$hpd_build/$hpd_name.arm64.dylib" "$hpd_build/$hpd_name.arm64e.dylib" -output "$hpd_build/$hpd_name.dylib"
     python3 "$hpd_project/scripts/verify_binary.py" "$hpd_build/$hpd_name.dylib"
 done
-python3 "$hpd_project/scripts/package.py" --binary "$hpd_build/HotspotVPNDNS.dylib" --preferences-binary "$hpd_build/HotspotVPNDNSPrefs.dylib" --output "$hpd_project/packages/local.hotspotvpndns_1.2.0_iphoneos-arm64e.deb"
+python3 "$hpd_project/scripts/package.py" --binary "$hpd_build/HotspotVPNDNS.dylib" --preferences-binary "$hpd_build/HotspotVPNDNSPrefs.dylib" --output "$hpd_project/packages/local.hotspotvpndns_1.2.1_iphoneos-arm64e.deb"
