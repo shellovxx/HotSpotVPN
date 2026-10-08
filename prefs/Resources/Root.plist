@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>HotspotVPN</string>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>DNS для точки доступа</string>
+			<key>footerText</key>
+			<string>Выбранный DNS выдаётся, когда включены этот переключатель и HotspotVPN в Пункте управления. При отключении любого из них используется DNS системы.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Выдавать выбранный DNS</string>
+			<key>defaults</key>
+			<string>local.hotspotvpndns</string>
+			<key>key</key>
+			<string>Enabled</string>
+			<key>default</key>
+			<true/>
+			<key>get</key>
+			<string>readDNSPreference:</string>
+			<key>set</key>
+			<string>setDNSPreference:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>label</key>
+			<string>DNS-сервер</string>
+			<key>detail</key>
+			<string>PSListItemsController</string>
+			<key>defaults</key>
+			<string>local.hotspotvpndns</string>
+			<key>key</key>
+			<string>Mode</string>
+			<key>default</key>
+			<string>cloudflare</string>
+			<key>validTitles</key>
+			<array>
+				<string>Cloudflare · 1.1.1.1</string>
+				<string>Google · 8.8.8.8</string>
+				<string>Свой IPv4</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<string>cloudflare</string>
+				<string>google</string>
+				<string>custom</string>
+			</array>
+			<key>get</key>
+			<string>readDNSPreference:</string>
+			<key>set</key>
+			<string>setDNSPreference:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Свой DNS</string>
+			<key>defaults</key>
+			<string>local.hotspotvpndns</string>
+			<key>key</key>
+			<string>CustomDNS</string>
+			<key>default</key>
+			<string>1.1.1.1</string>
+			<key>placeholder</key>
+			<string>Например 9.9.9.9</string>
+			<key>keyboard</key>
+			<string>NumbersAndPunctuation</string>
+			<key>autocapitalizationType</key>
+			<string>None</string>
+			<key>autocorrectionType</key>
+			<string>No</string>
+			<key>get</key>
+			<string>readDNSPreference:</string>
+			<key>set</key>
+			<string>setDNSPreference:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>После изменения переподключите устройства к точке доступа. Для своего DNS выберите «Свой IPv4». При неверном адресе используется обычный DNS точки доступа. Собственный DNS, DoH и IPv6 на клиентах эта настройка не ограничивает.</string>
+		</dict>
+	</array>
+</dict>
+</plist>

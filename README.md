@@ -18,7 +18,7 @@
 3. Добавьте HotspotVPN в **Настройки → Пункт управления**. Включите VPN, точку доступа и кнопку HotspotVPN.
 4. Выберите DNS в **Настройки → HotspotVPN**, затем переподключите клиентов.
 
-Первоначально выбран Cloudflare `1.1.1.1`; обновления сохраняют настройки. Настройки читаются через API `jbroot`, иконка загружается относительно ресурса PreferenceLoader. Хуки работают только в `bootpd`, меняют DHCP option 6 в OFFER/ACK и пересчитывают UDP checksum, сохраняя длину пакета.
+Первоначально выбран Cloudflare `1.1.1.1`; обновления сохраняют настройки. Контроллер Настроек и DHCP-хук используют общий атомарно записываемый файл через API `jbroot`; состояние основного HotspotVPN читается из его системного домена. Иконка PreferenceLoader имеет стандартные 29 точек и варианты 2×/3×. Хуки работают только в `bootpd`, меняют DHCP option 6 в OFFER/ACK и пересчитывают UDP checksum, сохраняя длину пакета.
 
 Удаление DNS: `sudo dpkg -r local.hotspotvpndns`. Основной пакет и сохранённые настройки остаются. `dpkg -i` самостоятельно не скачивает зависимости.
 
@@ -29,7 +29,7 @@ make clean package FINALPACKAGE=1 DEBUG=0
 python3 tests/run.py
 # Альтернатива: clang, ld, lipo и ldid в PATH
 THEOS=/path/to/roothide-theos HPD_SDK=/path/to/iPhoneOS16.5.sdk sh scripts/build-native.sh
-python3 scripts/package.py --binary work/ios-build/HotspotVPNDNS.dylib --output packages/local.hotspotvpndns_1.2.0_iphoneos-arm64e.deb
+python3 scripts/package.py --binary work/ios-build/HotspotVPNDNS.dylib --preferences-binary work/ios-build/HotspotVPNDNSPrefs.dylib --output packages/local.hotspotvpndns_1.2.0_iphoneos-arm64e.deb
 ```
 
 Для воспроизведения основной сборки сначала конвертируйте копию `original/com.evgeniy.hotspotvpn_1.0_iphoneos-arm64.deb` через RootHide Converter. Converter может удалить входной файл, поэтому используйте копию. Затем на устройстве с Python 3, ldid и cctools выполните:
@@ -38,4 +38,4 @@ python3 scripts/package.py --binary work/ios-build/HotspotVPNDNS.dylib --output 
 sh scripts/package-vendor.sh /path/to/converted.deb /path/to/output.deb
 ```
 
-Проверено на iPhone 11 Pro Max / iOS 16.6.1 / Relaxin / RootHide / ElleKit / Happ: модуль CC, страница настроек, загрузка хуков и реальная раздача по Wi-Fi на второй телефон. Подробности в [проверке RootHide](verification-roothide.md). 28 тестов парсера проходят. DoH/DoT, IPv6 и собственный DNS клиента не контролируются; kill switch отсутствует.
+Проверено на iPhone 11 Pro Max / iOS 16.6.1 / Relaxin / RootHide / ElleKit / Happ: модуль CC, страница настроек, загрузка хуков и реальная раздача по Wi-Fi на второй телефон. Подробности в [проверке RootHide](verification-roothide.md). 29 тестов парсера проходят. DoH/DoT, IPv6 и собственный DNS клиента не контролируются; kill switch отсутствует.

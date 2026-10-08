@@ -1,6 +1,7 @@
 /* RootHide bootpd transport hooks. Packet parsing remains portable C. */
 %config(generator=MobileSubstrate);
 #include "dhcp_dns.h"
+#include "preferences.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <arpa/inet.h>
 #include <dlfcn.h>
@@ -22,7 +23,6 @@
 #include <roothide.h>
 #include <unistd.h>
 
-#define PREFS "/var/mobile/Library/Preferences/local.hotspotvpndns.plist"
 #define MAX_PACKET 4096
 static _Thread_local int busy;
 static pthread_mutex_t bpf_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -32,62 +32,6 @@ static int bridge_name(const char *s) {
     if (strncmp(s,"bridge",6) || !s[6]) return 0;
     for (s += 6; *s; s++) if (*s < '0' || *s > '9') return 0;
     return 1;
-}
-
-static CFTypeRef dictionary_value(CFDictionaryRef dict,const char *name) {
-    CFStringRef key=CFStringCreateWithCString(NULL,name,kCFStringEncodingUTF8);
-    if(!key) return NULL;
-    CFTypeRef value=CFDictionaryGetValue(dict,key);
-    CFRelease(key);
-    return value;
-}
-
-static int selected_dns(uint8_t dns[4]) {
-    int fd = open(jbroot(PREFS), O_RDONLY | O_NOFOLLOW);
-    if (fd < 0) return 0;
-    struct stat st;
-    if (fstat(fd,&st) || !S_ISREG(st.st_mode) || st.st_size <= 0 || st.st_size > 16384) {
-        close(fd); return 0;
-    }
-    size_t len = (size_t)st.st_size;
-    uint8_t *bytes = malloc(len);
-    if (!bytes) { close(fd); return 0; }
-    size_t off = 0;
-    while (off < len) {
-        ssize_t n = read(fd, bytes + off, len - off);
-        if (n < 0 && errno == EINTR) continue;
-        if (n <= 0) break;
-        off += (size_t)n;
-    }
-    close(fd);
-    CFDataRef data = off == len ? CFDataCreate(NULL,bytes,(CFIndex)len) : NULL;
-    free(bytes);
-    if (!data) return 0;
-    CFPropertyListRef plist = CFPropertyListCreateWithData(NULL,data,kCFPropertyListImmutable,NULL,NULL);
-    CFRelease(data);
-    if (!plist) return 0;
-    int valid = 0;
-    if (CFGetTypeID(plist) == CFDictionaryGetTypeID()) {
-        CFDictionaryRef dict = (CFDictionaryRef)plist;
-        CFTypeRef enabled = dictionary_value(dict,"Enabled");
-        if (enabled && CFGetTypeID(enabled) == CFBooleanGetTypeID() && CFBooleanGetValue(enabled)) {
-            CFStringRef mode = dictionary_value(dict,"Mode");
-            char text[32]="1.1.1.1",mode_text[32];
-            int text_valid=1;
-            if (mode && CFGetTypeID(mode) == CFStringGetTypeID()) {
-                if(!CFStringGetCString(mode,mode_text,sizeof(mode_text),kCFStringEncodingUTF8)) text_valid=0;
-                else if(!strcmp(mode_text,"google")) strcpy(text,"8.8.8.8");
-                else if(!strcmp(mode_text,"custom")) {
-                    CFStringRef value=dictionary_value(dict,"CustomDNS");
-                    text_valid=value && CFGetTypeID(value)==CFStringGetTypeID() && CFStringGetCString(value,text,sizeof(text),kCFStringEncodingUTF8);
-                } else if(strcmp(mode_text,"cloudflare")) text_valid=0;
-            } else if (mode) text_valid=0;
-            if (text_valid &&
-                inet_pton(AF_INET,text,dns) == 1 && dns[0] != 0 && dns[0] != 127 && dns[0] < 224) valid = 1;
-        }
-    }
-    CFRelease(plist);
-    return valid;
 }
 
 static int hotspot_server(const uint8_t server[4]) {
@@ -119,7 +63,7 @@ static uint8_t *udp_copy(int fd,const void *p,size_t n,const struct sockaddr *to
     int type; size = sizeof(type);
     if (getsockopt(fd,SOL_SOCKET,SO_TYPE,&type,&size) || type != SOCK_DGRAM) return NULL;
     uint8_t server[4], dns[4];
-    if (!hpd_server_id(p,n,server) || !hotspot_server(server) || !selected_dns(dns)) return NULL;
+    if (!hpd_server_id(p,n,server) || !hotspot_server(server) || !hpd_selected_dns(dns)) return NULL;
     uint8_t *copy = malloc(n);
     if (!copy) return NULL;
     memcpy(copy,p,n);
@@ -173,7 +117,7 @@ static uint8_t *bpf_copy(int fd,const void *p,size_t n) {
     if (!p || n < 14 + 20 + 8 + 241 || n > MAX_PACKET) return NULL;
     if (!hotspot_bpf(fd)) return NULL;
     uint8_t dns[4];
-    if (!selected_dns(dns)) return NULL;
+    if (!hpd_selected_dns(dns)) return NULL;
     uint8_t *copy = malloc(n);
     if (!copy) return NULL;
     memcpy(copy,p,n);
